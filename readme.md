@@ -29,24 +29,46 @@ It is designed to:
 
 In short, `ci.yml` helps ensure that new changes are clean, testable, and less likely to break the project.
 
-## Docker Packaging Workflow
+## Docker Workflows
 
-The workflow file `.github/workflows/docker-publish.yml` builds a Docker image for this project and packages it as a workflow artifact.
+This repository has two Docker-related GitHub Actions workflows.
 
-It runs on pushes to `main` (and can be started manually with `workflow_dispatch`) and does the following:
+### 1. Package Docker Image as Artifact
 
-1. Checks out your code.
-2. Builds the image using `Dockerfile` at the repository root.
-3. Exports the built image as `simplecalculator-image.tar`.
-4. Uploads that tar file as a GitHub Actions artifact.
+Workflow file: `.github/workflows/docker-package.yml`
 
-### Download the Package
+This workflow:
 
-After the workflow runs, open the workflow run in GitHub and download the artifact named `simplecalculator-docker-image`.
+1. Runs on push to `main` and on manual trigger (`workflow_dispatch`).
+2. Builds the image from the root `Dockerfile`.
+3. Exports the image as a tarball (`simplecalculator-image.tar`).
+4. Uploads it as the `simplecalculator-docker-image` artifact.
 
-You can load it locally with:
+To use the artifact locally after download:
 
 `docker load -i simplecalculator-image.tar`
+
+### 2. Build and Publish to Docker Hub
+
+Workflow file: `.github/workflows/dockerhub-publish.yml`
+
+This workflow:
+
+1. Runs on push to `main` and on manual trigger (`workflow_dispatch`).
+2. Logs into Docker Hub using repository secrets.
+3. Builds the image from the root `Dockerfile`.
+4. Pushes image tags to Docker Hub:
+	- `latest`
+	- short commit SHA tag
+
+Required repository secrets:
+
+- `DOCKER_HUB_USERNAME`
+- `DOCKER_HUB_ACCESS_TOKEN`
+
+Published image name:
+
+`<DOCKER_HUB_USERNAME>/simplecalculator`
 
 ## Why This Matters
 
